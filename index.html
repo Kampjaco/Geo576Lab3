@@ -31,9 +31,15 @@
       "esri/layers/FeatureLayer",
       "esri/geometry/Polyline",
       "esri/geometry/Polygon",
-      "esri/widgets/Editor"
-    ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Polyline, Polygon, Editor) {
+      "esri/widgets/Editor",
+      "esri/widgets/Legend"
+    ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Polyline, Polygon, Editor, Legend) {
         esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurFOkIusOF1VpY7XrI8On8rT97tNiNbtgFmCtwOvhjfFhOLXkYP94N4hIcMdSHeUciUtB2IWQ_2YVJSdXzi_IWhmWdynaqt-VAFxx-m7QPXP1DZmxEPt6TyPJFH2W9SBFrsQHr3ANSUDx_agoBAH_kBJgf2rPafNi3Gymbl1Y9ob936ZFAViwcKE2ho6AMyipqnfeD2Q6xy6isdIWOpV36ZvShZri_FF0fkzhr7ztkfsZAT1_bPmqfOUP";   
+        
+
+        //-----------------------------------------------------//
+        //Setting up Map and MapView
+
         
         const map = new Map({ 
           basemap: "osm" // Basemap layer service 
@@ -45,6 +51,11 @@
           zoom: 15, // Zoom level
           container: "viewDiv" // Div element
         });
+
+
+        //-----------------------------------------------------//
+        //Setting up graphics layers point along with a popup
+
 
         //Constructor for graphics layer
         const graphicsLayer = new GraphicsLayer();
@@ -91,7 +102,11 @@
         //Add point to graphicsLayer
         graphicsLayer.add(pointGraphic);
 
-        
+
+        //-----------------------------------------------------//
+        //Creating polylines and polygon in Graphics layer
+
+
         // Define the polyline geometry
         const polyline = new Polyline({
           paths: [
@@ -125,8 +140,8 @@
           rings: [
             [-94.0945, 43.6530], 
             [-94.0943, 43.6522],
-           [-94.0938, 43.6520],
-           [-94.0940, 43.6526],
+            [-94.0938, 43.6520],
+            [-94.0940, 43.6526],
             [-94.0945, 43.6530]  
           ],
           spatialReference: { wkid: 4326 }
@@ -152,6 +167,10 @@
         graphicsLayer.add(polygonGraphic);
 
 
+        //-----------------------------------------------------//
+        //Working with hosted USA universities feature layer
+
+
         //Define popup for usaeduLayer
         const popupEduusa = {
           "title": "EDUs",
@@ -164,10 +183,16 @@
 
          //Adds popup for usaeduLayer
          outFields: ["INSTNM","INSTSIZE","WEBADDR"],
-         popupTemplate: popupEduusa
+         popupTemplate: popupEduusa,
+         title: "Colleges and Universities"
         });
 
         map.add(usaeduLayer);
+
+
+        //-----------------------------------------------------//
+        //Working with hosted USA airports feature layer
+
 
         //Adds airport icon from Github page
         const airportRenderer = {
@@ -205,10 +230,16 @@
           url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_JacobKampf/FeatureServer",
           renderer: airportRenderer,
           definitionExpression: "Fac_Type = 'AIRPORT'",
-          labelingInfo: [airportLabels]
+          labelingInfo: [airportLabels],
+          title: "Airports"
         });
 
         map.add(airportsLayer);
+
+
+        //-----------------------------------------------------//
+        //Working with hosted USA airports feature layer, but just heliports
+
 
         //Adds helipad icon from Github page
         const helipadRenderer = {
@@ -246,13 +277,18 @@
           url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_JacobKampf/FeatureServer",
           renderer: helipadRenderer,
           definitionExpression: "Fac_Type = 'HELIPORT'",
-          labelingInfo: [helipadLabels]
+          labelingInfo: [helipadLabels],
+          title: "Heliports"
         });
 
         //Add helipadsLayer to map
         map.add(helipadsLayer);
 
         
+        //-----------------------------------------------------//
+        //Working with myAirports hosted feature layer, which has airport codes for USA airports
+
+
         //Setting up styling for myAirports feature layer
         const myAirportsRenderer = {
           "type": "simple",
@@ -283,11 +319,13 @@
             expression: "$feature.AirportCode"
           }
         };
+
         //adding the const for myAirports feature layer
         const myAirports = new FeatureLayer({
           url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/MyAirportsJacobKampf/FeatureServer",
           renderer: myAirportsRenderer,
           labelingInfo: [myAirportsLabels],
+          title: "Airport Codes",
         
           //adding the popup here
           outFields: ["AirportCode"]
@@ -296,6 +334,11 @@
 
         //adding the feature layer to the map
         map.add(myAirports);
+
+
+        //-----------------------------------------------------//
+        //Adding editing tab to MapView
+
 
         // Set the point layer's LayerInfo
         const pointInfos = {
@@ -310,6 +353,36 @@
 
         // Add the widget to the view
         view.ui.add(editor, "top-right");
+
+
+        //-----------------------------------------------------//
+        //Adding legend to MapView
+
+
+        const legend = new Legend ({
+          view: view,
+          //Give custom names to legend items
+          layerInfos: [
+            {
+              layer:usaeduLayer,
+              title: "Colleges and Universities"
+            },
+            {
+              layer: airportsLayer,
+              title: "Airports"
+            },
+            {
+              layer: helipadsLayer,
+              title: "Heliports"
+            },
+            {
+              layer: myAirports,
+              title: "Airport Codes"
+            }
+          ]
+        });
+
+        view.ui.add(legend, "bottom-right");
 
       }
         
