@@ -252,13 +252,24 @@
         //Add helipadsLayer to map
         map.add(helipadsLayer);
 
-
+        
+        //Setting up styling for myAirports feature layer
+        const myAirportsRenderer = {
+          "type": "simple",
+          "symbol": {
+            "type": "picture-marker",
+            "url": "https://kampjaco.github.io/Geo576Lab3/beenhere_24dp_EA3323.png",
+            "width": "18px",
+            "height": "18px"
+          }
+        };        
         //adding the const for myAirports feature layer
         const myAirports = new FeatureLayer({
           url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/MyAirportsJacobKampf/FeatureServer",
+          renderer: myAirportsRenderer,
         
           //adding the popup here
-          outFields: ["AirportCode"],
+          outFields: ["AirportCode"]
 
         });
 
