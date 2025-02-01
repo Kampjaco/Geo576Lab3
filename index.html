@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hello, AGOL!</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="" />
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.25/"></script>
+
+  <style>  
+      html,  
+      body,  
+      #viewDiv {  
+        padding: 0;  
+        margin: 0;  
+        height: 100%;  
+        width: 100%;  
+      }  
+    </style> 
+
+<script>  
+    require([
+      "esri/config", 
+      "esri/Map", 
+      "esri/views/MapView",
+      "esri/Graphic",
+      "esri/layers/GraphicsLayer",
+      "esri/layers/FeatureLayer",
+      "esri/geometry/Polyline",
+      "esri/geometry/Polygon"
+    ], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Polyline, Polygon) {
+        esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurFOkIusOF1VpY7XrI8On8rT97tNiNbtgFmCtwOvhjfFhOLXkYP94N4hIcMdSHeUciUtB2IWQ_2YVJSdXzi_IWhmWdynaqt-VAFxx-m7QPXP1DZmxEPt6TyPJFH2W9SBFrsQHr3ANSUDx_agoBAH_kBJgf2rPafNi3Gymbl1Y9ob936ZFAViwcKE2ho6AMyipqnfeD2Q6xy6isdIWOpV36ZvShZri_FF0fkzhr7ztkfsZAT1_bPmqfOUP";   
+        
+        const map = new Map({ 
+          basemap: "osm" // Basemap layer service 
+        });
+
+        const view = new MapView({
+          map: map,
+          center: [-94.09564505572541, 43.65061390407357], // Longitude, latitude
+          zoom: 15, // Zoom level
+          container: "viewDiv" // Div element
+        });
+
+        //Constructor for graphics layer
+        const graphicsLayer = new GraphicsLayer();
+        map.add(graphicsLayer);
+
+        //Define geometry of point
+        const point = {
+          type: "point",
+          longitude: -94.09571857616957,
+          latitude: 43.65066653112517
+        };
+
+        //Define marker style
+        const simpleMarkerSymbol = {
+          type: "simple-marker",
+          color: [63,161,73],
+          style: "diamond",
+          outline: {
+            color: [255,255,255],
+            width: 1
+          }
+        };
+
+        //Defining popup properties
+        const popupTemplate = {
+          title: "{Name}",
+          content: "{Description}"
+        }
+        const attributes = {
+          Name: "Jolly Green Giant Statue",
+          Description: "A large statue of the Jolly Green Giant.  You may recognize him from the frozen veggie brand Green Giant!"
+        }
+
+        //Create the point
+        const pointGraphic = new Graphic ({
+          geometry: point,
+          symbol: simpleMarkerSymbol,
+
+          //Adding popup properties
+          attributes: attributes,
+          popupTemplate: popupTemplate
+        });
+
+        //Add point to graphicsLayer
+        graphicsLayer.add(pointGraphic);
+
+        
+        // Define the polyline geometry
+        const polyline = new Polyline({
+          paths: [
+            [-94.0964, 43.6521], // Point 1
+            [-94.0963, 43.6512], // Point 2
+            [-94.0954, 43.6511], // Point 3
+            [-94.0956, 43.6519], // Point 4
+            [-94.0958, 43.6521],  // Point 5
+            [-94.0964, 43.6521]  //Point 6
+          ],
+          spatialReference: { wkid: 4326 } // WGS 84
+        });
+
+        //Define polyline symbol
+        const polylineSymbol = {
+          type: "polyline",
+          color: [26, 119, 40],
+          width: 2
+        };
+
+        //Create the graphic
+        const polylineGraphic = new Graphic({
+          geometry: polyline,
+          symbol: polylineSymbol
+        });
+
+        //Add polyline to graphics layer
+        graphicsLayer.add(polylineGraphic);
+
+        const polygon = new Polygon({
+          rings: [
+            [-94.0945, 43.6530], 
+            [-94.0943, 43.6522],
+           [-94.0938, 43.6520],
+           [-94.0940, 43.6526],
+            [-94.0945, 43.6530]  
+          ],
+          spatialReference: { wkid: 4326 }
+        });
+
+        // Define the polygon symbol (style)
+        const polygonSymbol = {
+          type: "simple-fill",
+          color: [51, 102, 204, 0.4], // Blue with transparency
+          outline: {
+            color: [0, 0, 0],
+            width: 2
+          }
+        };
+
+        // Create the Graphic
+        const polygonGraphic = new Graphic({
+          geometry: polygon,
+          symbol: polygonSymbol
+        });
+
+        // Add the polygon to the GraphicsLayer
+        graphicsLayer.add(polygonGraphic);
+
+
+        //Define popup for usaeduLayer
+        const popupEduusa = {
+          "title": "EDUs",
+          "content": "<b>Name:</b> {INSTNM}<br> <b>Enrollment Range:</b> {INSTSIZE}<br><b>Website:</b> <a href='{WEBADDR}'>{WEBADDR} <br>"
+        }
+
+        //Adds USA universities and colleges feature layer to map
+        const usaeduLayer = new FeatureLayer({
+        url: "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/Colleges_and_Universities_View/FeatureServer",
+
+         //Adds popup for usaeduLayer
+         outFields: ["INSTNM","INSTSIZE","WEBADDR"],
+         popupTemplate: popupEduusa
+        });
+
+        map.add(usaeduLayer);
+
+        //Adds airport icon from Github page
+        const airportRenderer = {
+          "type": "simple",
+          "symbol": {
+            "type": "picture-marker",
+            "url": "https://sounny.github.io/agol/outline_local_airport_black_24dp.png",
+            "width": "18px",
+            "height": "18px"
+          }
+        }
+
+        //const to make the airport labels
+        const airportLabels = {
+          symbol: {
+            type: "text",
+            color: "#FFFFFF",
+            haloColor: "#5E8D74",
+            haloSize: "2px",
+            font: {
+              size: "12px",
+              family: "Noto Sans",
+              style: "italic",
+              weight: "normal"
+            }
+          },
+          labelPlacement: "above-center",
+          labelExpressionInfo: {
+            expression: "$feature.Fac_Name"
+          }
+        };
+
+        //Add USA airports feature layer
+        const airportsLayer = new FeatureLayer({
+          url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_JacobKampf/FeatureServer",
+          renderer: airportRenderer,
+          definitionExpression: "Fac_Type = 'AIRPORT'",
+          labelingInfo: [airportLabels]
+        });
+
+        map.add(airportsLayer);
+
+        //Adds helipad icon from Github page
+        const helipadRenderer = {
+          "type": "simple",
+          "symbol": {
+            "type": "picture-marker",
+            "url": "https://kampjaco.github.io/Geo576Lab2/star_24dp_000000.png",
+            "width": "18px",
+            "height": "18px"
+          }
+        };
+
+        //const to make the helipad labels
+        const helipadLabels = {
+          symbol: {
+            type: "text",
+            color: "#FFFFFF",
+            haloColor: "#FFA500",
+            haloSize: "2px",
+            font: {
+              size: "12px",
+              family: "Noto Sans",
+              style: "italic",
+              weight: "normal"
+            }
+          },
+          labelPlacement: "above-center",
+          labelExpressionInfo: {
+            expression: "$feature.Fac_Name"
+          }
+        };
+
+        //Add USA helipads feature layer
+        const helipadsLayer = new FeatureLayer({
+          url: "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/US_Airports_JacobKampf/FeatureServer",
+          renderer: helipadRenderer,
+          definitionExpression: "Fac_Type = 'HELIPORT'",
+          labelingInfo: [helipadLabels]
+        });
+
+        //Add helipadsLayer to map
+        map.add(helipadsLayer);
+
+      }
+        
+    );
+      
+ </script>
+
+</head>
+<body>
+
+  <div id="viewDiv"></div> 
+
+</body>
+</html>
